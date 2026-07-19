@@ -27,6 +27,23 @@ function M.set_header(level)
   M.addMarkdownHeader(level)
 end
 
+-- `operatorfunc` invoked via `g@` so that `.` repeats the header-level change
+-- on another line. `g@` is a native Vim operator; `.` re-runs the last
+-- operator + motion, re-invoking this function on the new current line.
+-- `kind` is the motion type ("char", "line", or "block"); we operate on the
+-- current line regardless, so `g@_` (current line) is the intended caller.
+-- The level to apply is stashed in `M._pending_level` by the mapping.
+M._pending_level = nil
+
+function M.set_header_op(kind)
+  -- `kind` is supplied by Vim; we ignore it because we always target the
+  -- current line.
+  local level = M._pending_level
+  if level then
+    M.set_header(level)
+  end
+end
+
 function M.setup(opts)
   opts = config.merge(opts)
   vim.api.nvim_create_autocmd("FileType", {
@@ -36,10 +53,16 @@ function M.setup(opts)
         vim.keymap.set(
           "n",
           opts.keymap_prefix .. level,
-          function() M.set_header(level) end,
+          function()
+            -- Stash the level so the operatorfunc knows which level to apply
+            -- when re-invoked by `.`.
+            M._pending_level = level
+            vim.o.operatorfunc = "v:lua.require'nvim-header-formatter'.set_header_op"
+            return "g@_"
+          end,
           {
             buffer = args.buf,
-            noremap = true,
+            expr = true,
             silent = true,
             desc = "Set markdown header level " .. level,
           }
