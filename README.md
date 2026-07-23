@@ -17,7 +17,7 @@ A tiny Neovim plugin to set or replace Markdown header levels on the current lin
 
 ```lua
 {
-  "alexhokl/nvim-header-formatter",
+  "alexhokl/nvim-md-header-formatter",
   ft = "markdown",
   opts = {},
 }
@@ -26,7 +26,7 @@ A tiny Neovim plugin to set or replace Markdown header levels on the current lin
 ## Setup
 
 ```lua
-require("nvim-header-formatter").setup({
+require("nvim-md-header-formatter").setup({
   keymap_prefix = "<leader>h",   -- yields <leader>h1 .. <leader>h6
   levels        = { 1, 2, 3, 4, 5, 6 },
   ft            = { "markdown" },
